@@ -1,8 +1,9 @@
-import { Blockchain, ExternalOut, SandboxContract, TreasuryContract } from '@ton/sandbox';
+import { Blockchain, EventMessageSent, ExternalOut, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { Slice, toNano } from '@ton/core';
 import {
     JointMoneyGroup,
     JointMoneyManager,
+    loadDeposit,
     loadGroupCreated,
     loadMemberAccepted,
     loadMemberInvited,
@@ -192,5 +193,83 @@ describe('JointMoney', () => {
         expect(groupState.invites.has(someOtherUser.address)).toBe(false);
         expect(groupState.invitesCount).toBe(0n);
         expect(groupState.invites.size).toBe(0);
+    });
+
+    it("shouldn't accept invite if not invited", async () => {
+        const someOtherUser = await blockchain.treasury('someOtherUser');
+
+        const res = await jointMoneyManager.send(
+            deployer.getSender(),
+            {
+                value: toNano('100'),
+            },
+            {
+                $$type: 'CreateGroup',
+                queryId: 1n,
+            },
+        );
+
+        const groupCreatedMessage = loadApplicableMessage(res.externals, loadGroupCreated);
+
+        expect(groupCreatedMessage).not.toBeUndefined();
+
+        console.log('other user address', someOtherUser.address.toString());
+        console.log('group address', groupCreatedMessage!.address.toString());
+
+        const groupInstance = blockchain.openContract(JointMoneyGroup.fromAddress(groupCreatedMessage!.address));
+
+        const acceptResult = await groupInstance.send(
+            someOtherUser.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'AcceptInvite',
+            },
+        );
+
+        const errorEvent = acceptResult.events.find(
+            (e) => e.type === 'message_sent' && e.bounced === true,
+        ) as EventMessageSent;
+
+        expect(errorEvent).not.toBeUndefined();
+    });
+
+    it('should withdraw', async () => {
+        const receiver = await blockchain.treasury('receiver', { balance: toNano('0.01') });
+
+        const res = await jointMoneyManager.send(
+            deployer.getSender(),
+            {
+                value: toNano('100'),
+            },
+            {
+                $$type: 'CreateGroup',
+                queryId: 1n,
+            },
+        );
+
+        const groupCreatedMessage = loadApplicableMessage(res.externals, loadGroupCreated);
+        expect(groupCreatedMessage).not.toBeUndefined();
+
+        const groupInstance = blockchain.openContract(JointMoneyGroup.fromAddress(groupCreatedMessage!.address));
+
+        const withdrawResult = await groupInstance.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'Withdraw',
+                to: receiver.address,
+                amount: toNano('10'),
+            },
+        );
+
+        const groupState = await groupInstance.getState();
+        expect(groupState.balance).toBeGreaterThan(0n);
+        expect(groupState.balance).toBeLessThan(toNano('90'));
+
+        expect(await receiver.getBalance()).toBeGreaterThan(toNano('5'));
     });
 });

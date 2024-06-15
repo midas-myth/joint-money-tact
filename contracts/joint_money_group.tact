@@ -25,6 +25,16 @@ message GroupView {
     invitesCount: Int as uint8;
     balance: Int as coins;
 }
+message Deposited {
+    newBalance: Int as coins;
+}
+message Withdraw {
+    to: Address;
+    amount: Int as coins;
+}
+message Withdrawn {
+    newBalance: Int as coins;
+}
 const MAX_MEMBERS: Int = 10;
 const MAX_INVITES: Int = 10;
 
@@ -67,7 +77,22 @@ contract JointMoneyGroup with Deployable {
     }
 
     receive(msg: Deposit){
-        require(self.members.get(sender()) != null, "Only members can deposit");
+        require(self.members.get(sender()) != null, "hello");
+        emit(Deposited{newBalance: myBalance()}.toCell());
+    }
+
+    receive(msg: Withdraw){
+        require(self.members.get(sender()) != null, "Only members can withdraw");
+        require(myBalance() >= msg.amount, "Insufficient balance");
+        send(SendParameters{
+                //
+                to: msg.to,
+                value: msg.amount,
+                mode: SendPayGasSeparately
+            }
+        );
+        let estimatedNewBalance: Int = (myBalance() - msg.amount);
+        emit(Withdrawn{newBalance: estimatedNewBalance}.toCell());
     }
 
     get fun state(): GroupView {
