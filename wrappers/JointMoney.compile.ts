@@ -5,6 +5,6 @@ export const compile: CompilerConfig = {
     target: 'contracts/joint_money_manager.tact',
     options: {
         debug: true,
-        external: true,
+        external: false,
     },
 };
