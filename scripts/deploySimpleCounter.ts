@@ -1,5 +1,5 @@
 import { toNano } from '@ton/core';
-import { SimpleCounter } from '../wrappers/SimpleCounter';
+import { SimpleCounter } from '../wrappers/JointMoney';
 import { NetworkProvider } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider) {
@@ -13,7 +13,7 @@ export async function run(provider: NetworkProvider) {
         {
             $$type: 'Deploy',
             queryId: 0n,
-        }
+        },
     );
 
     await provider.waitForDeploy(simpleCounter.address);

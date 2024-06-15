@@ -1,5 +1,5 @@
 import { Address, toNano } from '@ton/core';
-import { SimpleCounter } from '../wrappers/SimpleCounter';
+import { JointMoneyManager } from '../wrappers/JointMoney';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider, args: string[]) {
@@ -12,7 +12,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
         return;
     }
 
-    const simpleCounter = provider.open(SimpleCounter.fromAddress(address));
+    const simpleCounter = provider.open(JointMoneyManager.fromAddress(address));
 
     const counterBefore = await simpleCounter.getCounter();
 
@@ -25,7 +25,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
             $$type: 'Add',
             queryId: 0n,
             amount: 1n,
-        }
+        },
     );
 
     ui.write('Waiting for counter to increase...');
