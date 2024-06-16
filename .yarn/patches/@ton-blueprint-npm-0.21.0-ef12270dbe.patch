@@ -1,0 +1,63 @@
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..67b6845fda8298df428b29d0d3225284a1506173
+--- /dev/null
++++ b/.vscode/settings.json
+@@ -0,0 +1,7 @@
++{
++    "workbench.colorCustomizations": {
++        "activityBar.background": "#191C85",
++        "titleBar.activeBackground": "#2227BA",
++        "titleBar.activeForeground": "#FCFCFE"
++    }
++}
+\ No newline at end of file
+diff --git a/dist/cli/cli.js b/dist/cli/cli.js
+old mode 100755
+new mode 100644
+diff --git a/dist/network/createNetworkProvider.js b/dist/network/createNetworkProvider.js
+index ac763056cea35489418c2a5122af10c82f71d8a7..71e6f3140a0ea773fd5cd78c25a697beb51ed9f9 100644
+--- a/dist/network/createNetworkProvider.js
++++ b/dist/network/createNetworkProvider.js
+@@ -193,12 +193,17 @@ async function createMnemonicProvider(client, ui) {
+     if (mnemonic.length === 0 || walletVersion.length === 0) {
+         throw new Error('Mnemonic deployer was chosen, but env variables WALLET_MNEMONIC and WALLET_VERSION are not set');
+     }
++    const walletId = process.env.WALLET_ID ? parseInt(process.env.WALLET_ID) : undefined;
++    if (walletId !== undefined && isNaN(walletId)) {
++        throw new Error("Mnemonic deployer was chosen, but env variable WALLET_ID is set and it's not a number");
++    }
+     const keyPair = await (0, crypto_1.mnemonicToPrivateKey)(mnemonic.split(' '));
+     return new MnemonicProvider_1.MnemonicProvider({
+         version: walletVersion.toLowerCase(),
+         client,
+         secretKey: keyPair.secretKey,
+         ui,
++        walletId,
+     });
+ }
+ class NetworkProviderBuilder {
+diff --git a/dist/network/send/MnemonicProvider.d.ts b/dist/network/send/MnemonicProvider.d.ts
+index 229f93581feebf8b37c4089516951f7a48eff07e..9076dacf92b8c71d68623e8cbcb3334fa7a08ce7 100644
+--- a/dist/network/send/MnemonicProvider.d.ts
++++ b/dist/network/send/MnemonicProvider.d.ts
+@@ -12,6 +12,7 @@ export declare class MnemonicProvider implements SendProvider {
+         secretKey: Buffer;
+         client: TonClient4 | TonClient;
+         ui: UIProvider;
++        walletId?: number;
+     });
+     connect(): Promise<void>;
+     sendTransaction(address: Address, amount: bigint, payload?: Cell | undefined, stateInit?: StateInit | undefined): Promise<void>;
+diff --git a/dist/network/send/MnemonicProvider.js b/dist/network/send/MnemonicProvider.js
+index c4cc5092274fa35b5a649f9a5eb0d953c4e36cba..e058b4605440e7af3db6559b46ead6dc1697e514 100644
+--- a/dist/network/send/MnemonicProvider.js
++++ b/dist/network/send/MnemonicProvider.js
+@@ -40,6 +40,7 @@ class MnemonicProvider {
+         __classPrivateFieldSet(this, _MnemonicProvider_wallet, (0, core_1.openContract)(wallets[params.version].create({
+             workchain: params.workchain ?? 0,
+             publicKey: kp.publicKey,
++            walletId: params.walletId,
+         }), (params) => __classPrivateFieldGet(this, _MnemonicProvider_client, "f").provider(params.address, params.init)), "f");
+         __classPrivateFieldSet(this, _MnemonicProvider_secretKey, kp.secretKey, "f");
+         __classPrivateFieldSet(this, _MnemonicProvider_ui, params.ui, "f");
