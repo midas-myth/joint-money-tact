@@ -1,14 +1,15 @@
-import { Blockchain, EventMessageSent, ExternalOut, SandboxContract, TreasuryContract } from '@ton/sandbox';
+import '@ton/test-utils';
+
 import { Slice, toNano } from '@ton/core';
+import { Blockchain, EventMessageSent, ExternalOut, SandboxContract, TreasuryContract } from '@ton/sandbox';
+
+import { JointMoneyGroup } from '../wrappers/JointMoneyGroup';
 import {
-    JointMoneyGroup,
     JointMoneyManager,
-    loadDeposit,
     loadGroupCreated,
     loadMemberAccepted,
     loadMemberInvited,
-} from '../wrappers/JointMoney';
-import '@ton/test-utils';
+} from '../wrappers/JointMoneyManager';
 
 function loadApplicableMessage<T>(externals: ExternalOut[], loader: (data: Slice) => T): T | undefined {
     return (

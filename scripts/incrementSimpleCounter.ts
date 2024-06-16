@@ -1,5 +1,5 @@
 import { Address, toNano } from '@ton/core';
-import { JointMoneyManager } from '../wrappers/JointMoney';
+import { JointMoneyManager } from '../wrappers/JointMoneyManager';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider, args: string[]) {
