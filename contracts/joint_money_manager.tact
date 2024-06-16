@@ -2,6 +2,7 @@ import "@stdlib/deploy";
 import "./joint_money_group.tact";
 message CreateGroup {
     queryId: Int as uint64;
+    name: String;
 }
 
 contract JointMoneyManager with Deployable {
@@ -12,7 +13,7 @@ contract JointMoneyManager with Deployable {
 
     receive(msg: CreateGroup){
         self.groupCounter += 1;
-        let initialState: StateInit = initOf JointMoneyGroup(sender());
+        let initialState: StateInit = initOf JointMoneyGroup(sender(), msg.name);
         let futureAddress: Address = contractAddress(initialState);
         send(SendParameters{
                 bounce: true,

@@ -2,11 +2,34 @@ import { Address, toNano } from '@ton/core';
 import { JointMoneyManager } from '../wrappers/JointMoneyManager';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 import { JointMoneyGroup } from '../wrappers/JointMoneyGroup';
+import yargs from 'yargs/yargs';
 
 export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
 
-    const address = Address.parse(args.length > 0 ? args[0] : await ui.input('JointMoneyManager address'));
+    const parser = await yargs(args)
+        .option('address', {
+            type: 'string',
+            description: 'JointMoneyManager address',
+        })
+        .option('name', {
+            type: 'string',
+            description: 'Group name',
+        })
+        .parse();
+
+    let addressStr = parser.address;
+    let name = parser.name;
+
+    if (!addressStr) {
+        addressStr = await ui.input('JointMoneyManager address');
+    }
+
+    if (!name) {
+        name = await ui.input('Group name');
+    }
+
+    const address = Address.parse(addressStr);
 
     if (!(await provider.isContractDeployed(address))) {
         ui.write(`Error: Contract at address ${address} is not deployed!`);
@@ -23,12 +46,13 @@ export async function run(provider: NetworkProvider, args: string[]) {
         {
             $$type: 'CreateGroup',
             queryId: 0n,
+            name: name,
         },
     );
 
     ui.write('Waiting for the group to be created...');
 
-    const group = await JointMoneyGroup.fromInit(provider.sender().address!);
+    const group = await JointMoneyGroup.fromInit(provider.sender().address!, name);
 
     await provider.waitForDeploy(group.address);
 

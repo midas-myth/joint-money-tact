@@ -40,13 +40,15 @@ const MAX_INVITES: Int = 10;
 
 contract JointMoneyGroup with Deployable {
     admin: Address;
+    name: String;
     members: map<Address, Bool>;
     invites: map<Address, Bool>;
     membersCount: Int as uint8;
     invitesCount: Int as uint8;
-    init(admin: Address){
+    init(admin: Address, name: String){
         dump("JointMoneyGroup deployed");
         self.admin = admin;
+        self.name = name;
         self.members = emptyMap();
         self.members.set(admin, true);
         self.membersCount = 1;

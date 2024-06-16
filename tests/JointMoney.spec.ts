@@ -73,6 +73,7 @@ describe('JointMoney', () => {
             {
                 $$type: 'CreateGroup',
                 queryId: 1n,
+                name: 'Test Group',
             },
         );
 
@@ -103,7 +104,8 @@ describe('JointMoney', () => {
             },
             {
                 $$type: 'CreateGroup',
-                queryId: 1n,
+                queryId: 0n,
+                name: 'Test Group',
             },
         );
 
@@ -146,7 +148,8 @@ describe('JointMoney', () => {
             },
             {
                 $$type: 'CreateGroup',
-                queryId: 1n,
+                queryId: 0n,
+                name: 'Test Group',
             },
         );
 
@@ -207,6 +210,7 @@ describe('JointMoney', () => {
             {
                 $$type: 'CreateGroup',
                 queryId: 1n,
+                name: 'Test Group',
             },
         );
 
@@ -247,6 +251,7 @@ describe('JointMoney', () => {
             {
                 $$type: 'CreateGroup',
                 queryId: 1n,
+                name: 'Test Group',
             },
         );
 
