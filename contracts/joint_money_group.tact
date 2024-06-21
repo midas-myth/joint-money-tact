@@ -79,7 +79,7 @@ contract JointMoneyGroup with Deployable {
     }
 
     receive(msg: Deposit){
-        require(self.members.get(sender()) != null, "hello");
+        require(self.members.get(sender()) != null, "Only members can deposit");
         emit(Deposited{newBalance: myBalance()}.toCell());
     }
 
